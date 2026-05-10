@@ -1,0 +1,6 @@
+C:\Users\Dream\Desktop\FitnessTracker\FitnessTracker.Domain\bin\Debug\FitnessTracker.Domain.dll
+C:\Users\Dream\Desktop\FitnessTracker\FitnessTracker.Domain\bin\Debug\FitnessTracker.Domain.pdb
+C:\Users\Dream\Desktop\FitnessTracker\FitnessTracker.Domain\obj\Debug\FitnessTracker.Domain.csproj.AssemblyReference.cache
+C:\Users\Dream\Desktop\FitnessTracker\FitnessTracker.Domain\obj\Debug\FitnessTracker.Domain.csproj.CoreCompileInputs.cache
+C:\Users\Dream\Desktop\FitnessTracker\FitnessTracker.Domain\obj\Debug\FitnessTracker.Domain.dll
+C:\Users\Dream\Desktop\FitnessTracker\FitnessTracker.Domain\obj\Debug\FitnessTracker.Domain.pdb

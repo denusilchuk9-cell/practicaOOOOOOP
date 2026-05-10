@@ -1,0 +1,11 @@
+<Solution>
+  <Folder Name="/docs/">
+    <File Path="backlog.md" />
+    <File Path="vision.md" />
+  </Folder>
+  <Project Path="FitnessTracker.Application/FitnessTracker.Application.csproj" />
+  <Project Path="FitnessTracker.Console/FitnessTracker.Console.csproj" />
+  <Project Path="FitnessTracker.Domain/FitnessTracker.Domain.csproj" />
+  <Project Path="FitnessTracker.Infrastructure/FitnessTracker.Infrastructure.csproj" />
+  <Project Path="FitnessTracker.Tests/FitnessTracker.Tests.csproj" />
+</Solution>

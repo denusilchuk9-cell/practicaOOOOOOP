@@ -1,0 +1,11 @@
+C:\Users\Dream\Desktop\FitnessTracker\FitnessTracker.Infrastructure\bin\Debug\FitnessTracker.Infrastructure.dll
+C:\Users\Dream\Desktop\FitnessTracker\FitnessTracker.Infrastructure\bin\Debug\FitnessTracker.Infrastructure.pdb
+C:\Users\Dream\Desktop\FitnessTracker\FitnessTracker.Infrastructure\bin\Debug\FitnessTracker.Application.dll
+C:\Users\Dream\Desktop\FitnessTracker\FitnessTracker.Infrastructure\bin\Debug\FitnessTracker.Domain.dll
+C:\Users\Dream\Desktop\FitnessTracker\FitnessTracker.Infrastructure\bin\Debug\FitnessTracker.Application.pdb
+C:\Users\Dream\Desktop\FitnessTracker\FitnessTracker.Infrastructure\bin\Debug\FitnessTracker.Domain.pdb
+C:\Users\Dream\Desktop\FitnessTracker\FitnessTracker.Infrastructure\obj\Debug\FitnessTracker.Infrastructure.csproj.AssemblyReference.cache
+C:\Users\Dream\Desktop\FitnessTracker\FitnessTracker.Infrastructure\obj\Debug\FitnessTracker.Infrastructure.csproj.CoreCompileInputs.cache
+C:\Users\Dream\Desktop\FitnessTracker\FitnessTracker.Infrastructure\obj\Debug\FitnessT.BE40CA3A.Up2Date
+C:\Users\Dream\Desktop\FitnessTracker\FitnessTracker.Infrastructure\obj\Debug\FitnessTracker.Infrastructure.dll
+C:\Users\Dream\Desktop\FitnessTracker\FitnessTracker.Infrastructure\obj\Debug\FitnessTracker.Infrastructure.pdb
