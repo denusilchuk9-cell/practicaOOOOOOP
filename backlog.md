@@ -23,4 +23,4 @@
 ## Planned (Iteration 4)
 - [ ] USER_GUIDE.md
 - [ ] FINAL_REPORT.md
-- [ ] DEMO.md
+- [ ] DEMO.md₴

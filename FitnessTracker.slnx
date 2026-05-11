@@ -1,11 +1,21 @@
 <Solution>
   <Folder Name="/docs/">
     <File Path="backlog.md" />
+    <File Path="class-diagram.md" />
+    <File Path="iteration-1.md" />
+    <File Path="iteration-2-plan.md" />
+    <File Path="iteration-2.md" />
+    <File Path="iteration-3.md" />
+    <File Path="README.md" />
+    <File Path="sequence-diagram.md" />
+    <File Path="test-matrix.md" />
+    <File Path="test-strategy.md" />
+    <File Path="TESTING.md" />
     <File Path="vision.md" />
   </Folder>
-  <Project Path="FitnessTracker.Application/FitnessTracker.Application.csproj" />
-  <Project Path="FitnessTracker.Console/FitnessTracker.Console.csproj" />
-  <Project Path="FitnessTracker.Domain/FitnessTracker.Domain.csproj" />
-  <Project Path="FitnessTracker.Infrastructure/FitnessTracker.Infrastructure.csproj" />
-  <Project Path="FitnessTracker.Tests/FitnessTracker.Tests.csproj" />
+  <Project Path="FitnessTracker.Application/FitnessTracker.Application.csproj" Id="e908e881-256b-47de-884e-44d34c64413f" />
+  <Project Path="FitnessTracker.Console/FitnessTracker.Console.csproj" Id="0e0ffb4a-08fb-4ea2-a550-c7cc30d92913" />
+  <Project Path="FitnessTracker.Domain/FitnessTracker.Domain.csproj" Id="3008bd67-327d-4888-bc87-8ab5103c9ecb" />
+  <Project Path="FitnessTracker.Infrastructure/FitnessTracker.Infrastructure.csproj" Id="35c8e7db-281b-4240-98ba-fa6a74f12f4b" />
+  <Project Path="FitnessTracker.Tests/FitnessTracker.Tests.csproj" Id="879706a9-0055-4c18-9d06-a1fd629f997c" />
 </Solution>

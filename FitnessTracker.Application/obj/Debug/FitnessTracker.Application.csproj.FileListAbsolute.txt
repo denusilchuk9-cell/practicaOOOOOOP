@@ -1,9 +1,0 @@
-C:\Users\Dream\Desktop\FitnessTracker\FitnessTracker.Application\bin\Debug\FitnessTracker.Application.dll
-C:\Users\Dream\Desktop\FitnessTracker\FitnessTracker.Application\bin\Debug\FitnessTracker.Application.pdb
-C:\Users\Dream\Desktop\FitnessTracker\FitnessTracker.Application\bin\Debug\FitnessTracker.Domain.dll
-C:\Users\Dream\Desktop\FitnessTracker\FitnessTracker.Application\bin\Debug\FitnessTracker.Domain.pdb
-C:\Users\Dream\Desktop\FitnessTracker\FitnessTracker.Application\obj\Debug\FitnessTracker.Application.csproj.AssemblyReference.cache
-C:\Users\Dream\Desktop\FitnessTracker\FitnessTracker.Application\obj\Debug\FitnessTracker.Application.csproj.CoreCompileInputs.cache
-C:\Users\Dream\Desktop\FitnessTracker\FitnessTracker.Application\obj\Debug\FitnessT.BE9B4996.Up2Date
-C:\Users\Dream\Desktop\FitnessTracker\FitnessTracker.Application\obj\Debug\FitnessTracker.Application.dll
-C:\Users\Dream\Desktop\FitnessTracker\FitnessTracker.Application\obj\Debug\FitnessTracker.Application.pdb
