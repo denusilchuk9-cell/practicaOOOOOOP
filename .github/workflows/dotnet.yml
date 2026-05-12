@@ -11,12 +11,19 @@ jobs:
     runs-on: windows-latest
     steps:
     - uses: actions/checkout@v3
+
+    - name: Setup MSBuild
+      uses: microsoft/setup-msbuild@v1.1
+
     - name: Setup NuGet
       uses: NuGet/setup-nuget@v1
+
     - name: Restore
-      run: nuget restore FitnessTracker.sln
+      run: nuget restore FitnessTracker.slnx
+
     - name: Build
-      run: msbuild FitnessTracker.sln /p:Configuration=Release
+      run: msbuild FitnessTracker.slnx /p:Configuration=Release
+
     - name: Test
       run: |
         vstest.console.exe tests\FitnessTracker.Tests\bin\Release\FitnessTracker.Tests.dll
