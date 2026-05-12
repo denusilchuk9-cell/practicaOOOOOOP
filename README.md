@@ -1,39 +1,25 @@
 # FitnessTracker
 
-Console-based fitness tracking application built with .NET Framework 4.8.1.
+Консольний застосунок для відстеження тренувань на .NET Framework 4.8.1.
 
-## Features
-- Create and manage workout sessions
-- Add exercises with sets, reps, weight and duration
-- Track workout history per user
-- Analytics: total time, calories burned, breakdown by type
-- Search workouts by type or date range
-- Data persisted to JSON files between sessions
+## Можливості
+- Створення та керування тренуваннями
+- Додавання вправ із підходами, повтореннями, вагою та тривалістю
+- Перегляд історії тренувань
+- Аналітика: загальний час, спалені калорії, розбивка по типах
+- Пошук тренувань за типом або датою
+- Дані зберігаються у JSON файлах між сесіями
 
-## Project Structure
+## Структура проєкту
 FitnessTracker/
-├── FitnessTracker.Domain/        # Entities, interfaces, enums
-├── FitnessTracker.Application/   # Services, business rules, Strategy pattern
-├── FitnessTracker.Infrastructure/# File repositories, JSON persistence
-├── FitnessTracker.Console/       # Interactive console menu
-└── FitnessTracker.Tests/         # Unit and integration tests (28 tests)
-## How to run
-1. Open `FitnessTracker.slnx` in Visual Studio 2022
-2. Set `FitnessTracker.Console` as Startup Project
-3. Press F5
-
-## How to run tests
-`Test → Run All Tests` in Visual Studio
-
-Data is saved to `data/` folder next to the executable.
-
-## Architecture
-- **Domain**: pure business logic, no dependencies
-- **Application**: orchestrates domain, depends on interfaces
-- **Infrastructure**: implements interfaces, handles file I/O
-- **Console**: UI only, no business logic
-
-## Patterns used
-- Repository Pattern — IWorkoutRepository, IUserRepository
-- Factory Pattern — WorkoutFactory
-- Strategy Pattern — ICalorieCalculator
+├── src/
+│   ├── FitnessTracker.Domain/         # Сутності, інтерфейси, enum
+│   ├── FitnessTracker.Application/    # Сервіси, бізнес-логіка, патерн Strategy
+│   ├── FitnessTracker.Infrastructure/ # Репозиторії, JSON persistence
+│   └── FitnessTracker.Console/        # Інтерактивне консольне меню
+├── tests/
+│   └── FitnessTracker.Tests/          # Юніт та інтеграційні тести (28 тестів)
+├── docs/                              # Документація проєкту
+├── .github/workflows/                 # CI pipeline
+├── README.md
+└── TESTING.md
