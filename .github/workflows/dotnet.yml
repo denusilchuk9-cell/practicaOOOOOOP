@@ -1,0 +1,22 @@
+name: .NET Build and Test
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+    - uses: actions/checkout@v3
+    - name: Setup NuGet
+      uses: NuGet/setup-nuget@v1
+    - name: Restore
+      run: nuget restore FitnessTracker.sln
+    - name: Build
+      run: msbuild FitnessTracker.sln /p:Configuration=Release
+    - name: Test
+      run: |
+        vstest.console.exe tests\FitnessTracker.Tests\bin\Release\FitnessTracker.Tests.dll

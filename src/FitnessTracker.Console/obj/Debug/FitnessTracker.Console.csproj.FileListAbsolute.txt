@@ -1,0 +1,14 @@
+C:\Users\Dream\Desktop\FitnessTracker\FitnessTracker.Console\bin\Debug\FitnessTracker.Console.exe.config
+C:\Users\Dream\Desktop\FitnessTracker\FitnessTracker.Console\bin\Debug\FitnessTracker.Console.exe
+C:\Users\Dream\Desktop\FitnessTracker\FitnessTracker.Console\bin\Debug\FitnessTracker.Console.pdb
+C:\Users\Dream\Desktop\FitnessTracker\FitnessTracker.Console\bin\Debug\FitnessTracker.Application.dll
+C:\Users\Dream\Desktop\FitnessTracker\FitnessTracker.Console\bin\Debug\FitnessTracker.Domain.dll
+C:\Users\Dream\Desktop\FitnessTracker\FitnessTracker.Console\bin\Debug\FitnessTracker.Infrastructure.dll
+C:\Users\Dream\Desktop\FitnessTracker\FitnessTracker.Console\bin\Debug\FitnessTracker.Application.pdb
+C:\Users\Dream\Desktop\FitnessTracker\FitnessTracker.Console\bin\Debug\FitnessTracker.Domain.pdb
+C:\Users\Dream\Desktop\FitnessTracker\FitnessTracker.Console\bin\Debug\FitnessTracker.Infrastructure.pdb
+C:\Users\Dream\Desktop\FitnessTracker\FitnessTracker.Console\obj\Debug\FitnessTracker.Console.csproj.AssemblyReference.cache
+C:\Users\Dream\Desktop\FitnessTracker\FitnessTracker.Console\obj\Debug\FitnessTracker.Console.csproj.CoreCompileInputs.cache
+C:\Users\Dream\Desktop\FitnessTracker\FitnessTracker.Console\obj\Debug\FitnessT.9D37487D.Up2Date
+C:\Users\Dream\Desktop\FitnessTracker\FitnessTracker.Console\obj\Debug\FitnessTracker.Console.exe
+C:\Users\Dream\Desktop\FitnessTracker\FitnessTracker.Console\obj\Debug\FitnessTracker.Console.pdb
