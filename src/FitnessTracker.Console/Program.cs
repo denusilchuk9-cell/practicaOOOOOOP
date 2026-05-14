@@ -74,6 +74,7 @@ namespace FitnessTracker.Console
                 System.Console.WriteLine("2. View workout history");
                 System.Console.WriteLine("3. Analytics");
                 System.Console.WriteLine("4. Search workouts");
+                System.Console.WriteLine("5. Export data to XML");
                 System.Console.WriteLine("0. Exit");
                 System.Console.Write("Choice: ");
 
@@ -83,6 +84,7 @@ namespace FitnessTracker.Console
                     case "2": ViewHistory(); break;
                     case "3": AnalyticsMenu(); break;
                     case "4": SearchMenu(); break;
+                    case "5": ExportMenu(); break;
                     case "0": return;
                     default: System.Console.WriteLine("Invalid choice."); break;
                 }
@@ -190,6 +192,21 @@ namespace FitnessTracker.Console
                     foreach (var w in recent)
                         System.Console.WriteLine($"  {w.Title} | {w.StartedAt:dd.MM.yyyy}");
                     break;
+            }
+        }
+
+        static void ExportMenu()
+        {
+            System.Console.WriteLine("\n--- Export ---");
+            System.Console.WriteLine("1. Export all workouts to XML");
+            System.Console.Write("Choice: ");
+
+            if (System.Console.ReadLine() == "1")
+            {
+                var exportPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "export", $"workouts_{DateTime.Now:yyyyMMdd_HHmmss}.xml");
+                var exporter = new WorkoutXmlExporter(_workoutRepo);
+                exporter.ExportToXml(exportPath);
+                System.Console.WriteLine($"Exported to: {exportPath}");
             }
         }
 
