@@ -6,6 +6,7 @@
 3. UC-03: Analytics — total time, calories, breakdown by type
 4. UC-04: Search workouts by type and last 30 days
 5. UC-05: Select or create user profile on startup
+6. UC-06: Export data to XML
 
 ## Business rules implemented
 1. Cannot add exercise to a completed workout
@@ -19,7 +20,6 @@
 - Strength: volume-based (sets × reps × weight × 0.05)
 - Cardio: duration and weight based
 - Default: duration-based fallback
-- Reason: adding a new calculation method requires only a new class, no changes to WorkoutService
 
 ## LINQ queries
 1. Filter completed workouts by user
@@ -30,14 +30,16 @@
 6. Find longest workout by duration
 
 ## Specialized collection used
-- Dictionary<WorkoutType, int> for workout count by type grouping
+- Dictionary for cache in repositories
+- Dictionary<WorkoutType, int> for workout count by type
 
-## Classes changed
-- Program.cs — full interactive menu
+## Classes changed from Iteration 1
+- Program.cs — full interactive menu with XML export
 - Added: JsonDataStore<T>, WorkoutDto, FileWorkoutRepository, FileUserRepository
 - Added: WorkoutRehydrator, ExerciseRehydrator, UserRehydrator
 - Added: WorkoutQueryService, UserService
 - Added: StrengthCalorieCalculator, CardioCalorieCalculator, DefaultCalorieCalculator
+- Added: WorkoutXmlExporter, RetryHelper
 
 ## Riskiest scenarios for integration testing
 - Save workout → restart app → reload and verify state
