@@ -36,6 +36,12 @@ namespace FitnessTracker.Domain
             _exercises.Add(exercise);
         }
 
+        public void AddExerciseForRehydration(Exercise exercise)
+        {
+            if (exercise == null) throw new ArgumentNullException(nameof(exercise));
+            _exercises.Add(exercise);
+        }
+
         public void Complete(DateTime completedAt)
         {
             if (completedAt < StartedAt)

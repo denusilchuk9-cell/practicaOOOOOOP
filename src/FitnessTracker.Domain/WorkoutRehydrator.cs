@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Reflection;
+using System.Collections.Generic;
 
 namespace FitnessTracker.Domain
 {
@@ -15,7 +16,11 @@ namespace FitnessTracker.Domain
             idField?.SetValue(workout, id);
 
             if (completedAt.HasValue)
-                workout.Complete(completedAt.Value);
+            {
+                var completedAtField = typeof(Workout).GetField("<CompletedAt>k__BackingField",
+                    BindingFlags.NonPublic | BindingFlags.Instance);
+                completedAtField?.SetValue(workout, completedAt);
+            }
 
             return workout;
         }

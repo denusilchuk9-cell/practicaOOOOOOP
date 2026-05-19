@@ -19,3 +19,5 @@ C:\Users\Dream\Desktop\FitnessTracker\FitnessTracker.Tests\obj\Debug\FitnessTrac
 C:\Users\Dream\Desktop\FitnessTracker\FitnessTracker.Tests\obj\Debug\FitnessT.0D52D063.Up2Date
 C:\Users\Dream\Desktop\FitnessTracker\FitnessTracker.Tests\obj\Debug\FitnessTracker.Tests.dll
 C:\Users\Dream\Desktop\FitnessTracker\FitnessTracker.Tests\obj\Debug\FitnessTracker.Tests.pdb
+C:\Users\Dream\Desktop\FitnessTracker\practicaOOOOOOP\tests\FitnessTracker.Tests\obj\Debug\FitnessTracker.Tests.dll
+C:\Users\Dream\Desktop\FitnessTracker\practicaOOOOOOP\tests\FitnessTracker.Tests\obj\Debug\FitnessTracker.Tests.pdb
