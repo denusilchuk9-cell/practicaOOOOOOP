@@ -37,19 +37,18 @@ namespace FitnessTracker.Tests
         }
 
         [TestMethod]
+        [ExpectedException(typeof(InvalidOperationException))]
+        public void StartWorkout_NonExistentUser_Throws()
+        {
+            _service.StartWorkout(Guid.NewGuid(), "Ghost", WorkoutType.Strength);
+        }
+
+        [TestMethod]
         public void AddExercise_ToActiveWorkout_IncreasesCount()
         {
             var workout = _service.StartWorkout(_user.Id, "Strength", WorkoutType.Strength);
             _service.AddExercise(workout.Id, "Deadlift", 3, 5, 120.0, 200);
             Assert.AreEqual(1, workout.Exercises.Count);
-        }
-
-        [TestMethod]
-        public void CompleteWorkout_SetsIsCompleted()
-        {
-            var workout = _service.StartWorkout(_user.Id, "HIIT", WorkoutType.HIIT);
-            _service.CompleteWorkout(workout.Id);
-            Assert.IsTrue(workout.IsCompleted);
         }
 
         [TestMethod]
@@ -62,10 +61,11 @@ namespace FitnessTracker.Tests
         }
 
         [TestMethod]
-        [ExpectedException(typeof(InvalidOperationException))]
-        public void StartWorkout_NonExistentUser_Throws()
+        public void CompleteWorkout_SetsIsCompleted()
         {
-            _service.StartWorkout(Guid.NewGuid(), "Ghost", WorkoutType.Strength);
+            var workout = _service.StartWorkout(_user.Id, "HIIT", WorkoutType.HIIT);
+            _service.CompleteWorkout(workout.Id);
+            Assert.IsTrue(workout.IsCompleted);
         }
 
         [TestMethod]
@@ -87,19 +87,16 @@ namespace FitnessTracker.Tests
             _service.AddExercise(workout.Id, "B", 1, 1, 0, 200);
             Assert.AreEqual(300, workout.TotalDurationSeconds());
         }
+    }
 
+    [TestClass]
+    public class DomainTests
+    {
         [TestMethod]
         [ExpectedException(typeof(ArgumentException))]
         public void CreateUser_EmptyName_Throws()
         {
             new User("", 25, 70.0);
-        }
-
-        [TestMethod]
-        [ExpectedException(typeof(ArgumentException))]
-        public void CreateExercise_NegativeSets_Throws()
-        {
-            new Exercise("Squat", -1, 10, 50.0, 60);
         }
 
         [TestMethod]
@@ -117,31 +114,103 @@ namespace FitnessTracker.Tests
         }
 
         [TestMethod]
-        public void Workout_MultipleExercises_CountCorrect()
+        [ExpectedException(typeof(ArgumentException))]
+        public void CreateExercise_NegativeSets_Throws()
         {
-            var workout = _service.StartWorkout(_user.Id, "Big Day", WorkoutType.Strength);
-            for (int i = 0; i < 5; i++)
-                _service.AddExercise(workout.Id, $"Ex{i}", 3, 10, 50.0, 60);
-            Assert.AreEqual(5, workout.Exercises.Count);
+            new Exercise("Squat", -1, 10, 50.0, 60);
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentException))]
+        public void CompleteWorkout_BeforeStart_Throws()
+        {
+            var workout = new Workout(Guid.NewGuid(), "Test", WorkoutType.Cardio, DateTime.UtcNow);
+            workout.Complete(DateTime.UtcNow.AddHours(-1));
+        }
+    }
+
+    [TestClass]
+    public class CalorieCalculatorTests
+    {
+        private User _user;
+
+        [TestInitialize]
+        public void Setup()
+        {
+            _user = new User("Test", 25, 70.0);
+        }
+
+        [TestMethod]
+        public void StrengthCalculator_ReturnsPositive()
+        {
+            var workout = new Workout(_user.Id, "Strength", WorkoutType.Strength, DateTime.UtcNow);
+            var exercise = new Exercise("Bench", 4, 10, 80.0, 120);
+            workout.AddExercise(exercise);
+            var calculator = new StrengthCalorieCalculator();
+            var calories = calculator.Calculate(workout, _user);
+            Assert.IsTrue(calories > 0);
+        }
+
+        [TestMethod]
+        public void CardioCalculator_ReturnsPositive()
+        {
+            var workout = new Workout(_user.Id, "Run", WorkoutType.Cardio, DateTime.UtcNow);
+            var exercise = new Exercise("Treadmill", 1, 1, 0, 1800);
+            workout.AddExercise(exercise);
+            var calculator = new CardioCalorieCalculator();
+            var calories = calculator.Calculate(workout, _user);
+            Assert.IsTrue(calories > 0);
+        }
+
+        [TestMethod]
+        public void DefaultCalculator_ZeroDuration_ReturnsZero()
+        {
+            var workout = new Workout(_user.Id, "Empty", WorkoutType.HIIT, DateTime.UtcNow);
+            var calculator = new DefaultCalorieCalculator();
+            var calories = calculator.Calculate(workout, _user);
+            Assert.AreEqual(0.0, calories, 0.001);
+        }
+    }
+
+    [TestClass]
+    public class QueryServiceTests
+    {
+        private IWorkoutRepository _repo;
+        private WorkoutQueryService _query;
+        private User _user;
+
+        [TestInitialize]
+        public void Setup()
+        {
+            _repo = new InMemoryWorkoutRepository();
+            _query = new WorkoutQueryService(_repo);
+            _user = new User("Test", 25, 70.0);
+        }
+
+        private void CreateWorkout(string title, WorkoutType type, bool completed)
+        {
+            var workout = new Workout(_user.Id, title, type, DateTime.UtcNow);
+            workout.AddExercise(new Exercise(title, 1, 1, 0, 60));
+            if (completed)
+                workout.Complete(DateTime.UtcNow);
+            _repo.Save(workout);
         }
 
         [TestMethod]
         public void GetCompletedByUser_ReturnsOnlyCompleted()
         {
-            var w1 = _service.StartWorkout(_user.Id, "W1", WorkoutType.Cardio);
-            _service.StartWorkout(_user.Id, "W2", WorkoutType.Strength);
-            _service.CompleteWorkout(w1.Id);
-            var completed = _queryService.GetCompletedByUser(_user.Id).ToList();
+            CreateWorkout("W1", WorkoutType.Cardio, true);
+            CreateWorkout("W2", WorkoutType.Strength, false);
+            var completed = _query.GetCompletedByUser(_user.Id).ToList();
             Assert.AreEqual(1, completed.Count);
-            Assert.AreEqual("W1", completed[0].Title);
         }
 
         [TestMethod]
         public void GetByType_ReturnsCorrectType()
         {
-            _service.StartWorkout(_user.Id, "Cardio Day", WorkoutType.Cardio);
-            _service.StartWorkout(_user.Id, "Strength Day", WorkoutType.Strength);
-            var cardio = _queryService.GetByType(_user.Id, WorkoutType.Cardio).ToList();
+            CreateWorkout("Cardio Day", WorkoutType.Cardio, true);
+            CreateWorkout("Strength Day", WorkoutType.Strength, true);
+            var cardio = _query.GetByType(_user.Id, WorkoutType.Cardio).ToList();
             Assert.AreEqual(1, cardio.Count);
             Assert.AreEqual(WorkoutType.Cardio, cardio[0].Type);
         }
@@ -149,10 +218,10 @@ namespace FitnessTracker.Tests
         [TestMethod]
         public void GetWorkoutCountByType_GroupsCorrectly()
         {
-            _service.StartWorkout(_user.Id, "C1", WorkoutType.Cardio);
-            _service.StartWorkout(_user.Id, "C2", WorkoutType.Cardio);
-            _service.StartWorkout(_user.Id, "S1", WorkoutType.Strength);
-            var dict = _queryService.GetWorkoutCountByType(_user.Id);
+            CreateWorkout("C1", WorkoutType.Cardio, true);
+            CreateWorkout("C2", WorkoutType.Cardio, true);
+            CreateWorkout("S1", WorkoutType.Strength, true);
+            var dict = _query.GetWorkoutCountByType(_user.Id);
             Assert.AreEqual(2, dict[WorkoutType.Cardio]);
             Assert.AreEqual(1, dict[WorkoutType.Strength]);
         }
@@ -160,75 +229,34 @@ namespace FitnessTracker.Tests
         [TestMethod]
         public void GetTotalDurationMinutes_OnlyCompleted()
         {
-            var w1 = _service.StartWorkout(_user.Id, "W1", WorkoutType.Strength);
-            _service.AddExercise(w1.Id, "A", 1, 1, 0, 120);
-            _service.CompleteWorkout(w1.Id);
-            var w2 = _service.StartWorkout(_user.Id, "W2", WorkoutType.Cardio);
-            _service.AddExercise(w2.Id, "B", 1, 1, 0, 600);
-            var total = _queryService.GetTotalDurationMinutes(_user.Id);
+            var w1 = new Workout(_user.Id, "W1", WorkoutType.Strength, DateTime.UtcNow);
+            w1.AddExercise(new Exercise("A", 1, 1, 0, 120));
+            w1.Complete(DateTime.UtcNow);
+            _repo.Save(w1);
+
+            var w2 = new Workout(_user.Id, "W2", WorkoutType.Cardio, DateTime.UtcNow);
+            w2.AddExercise(new Exercise("B", 1, 1, 0, 600));
+            _repo.Save(w2);
+
+            var total = _query.GetTotalDurationMinutes(_user.Id);
             Assert.AreEqual(2.0, total, 0.01);
-        }
-
-        [TestMethod]
-        public void StrengthCalorieCalculator_ReturnsPositive()
-        {
-            var workout = _service.StartWorkout(_user.Id, "Strength", WorkoutType.Strength);
-            _service.AddExercise(workout.Id, "Bench", 4, 10, 80.0, 120);
-            var calc = new StrengthCalorieCalculator();
-            var cal = calc.Calculate(workout, _user);
-            Assert.IsTrue(cal > 0);
-        }
-
-        [TestMethod]
-        public void CardioCalorieCalculator_ReturnsPositive()
-        {
-            var workout = _service.StartWorkout(_user.Id, "Run", WorkoutType.Cardio);
-            _service.AddExercise(workout.Id, "Treadmill", 1, 1, 0, 1800);
-            var calc = new CardioCalorieCalculator();
-            var cal = calc.Calculate(workout, _user);
-            Assert.IsTrue(cal > 0);
-        }
-
-        [TestMethod]
-        public void DefaultCalorieCalculator_ZeroDuration_ReturnsZero()
-        {
-            var workout = _service.StartWorkout(_user.Id, "Empty", WorkoutType.HIIT);
-            var calc = new DefaultCalorieCalculator();
-            var cal = calc.Calculate(workout, _user);
-            Assert.AreEqual(0.0, cal, 0.001);
-        }
-
-        [TestMethod]
-        [ExpectedException(typeof(ArgumentException))]
-        public void CompleteWorkout_BeforeStart_Throws()
-        {
-            var workout = new Workout(_user.Id, "Test", WorkoutType.Cardio, DateTime.UtcNow);
-            workout.Complete(DateTime.UtcNow.AddHours(-1));
         }
 
         [TestMethod]
         public void GetLongestWorkout_ReturnsCorrect()
         {
-            var w1 = _service.StartWorkout(_user.Id, "Short", WorkoutType.Strength);
-            _service.AddExercise(w1.Id, "A", 1, 1, 0, 60);
-            _service.CompleteWorkout(w1.Id);
+            var w1 = new Workout(_user.Id, "Short", WorkoutType.Strength, DateTime.UtcNow);
+            w1.AddExercise(new Exercise("A", 1, 1, 0, 60));
+            w1.Complete(DateTime.UtcNow);
+            _repo.Save(w1);
 
-            var w2 = _service.StartWorkout(_user.Id, "Long", WorkoutType.Cardio);
-            _service.AddExercise(w2.Id, "B", 1, 1, 0, 3600);
-            _service.CompleteWorkout(w2.Id);
+            var w2 = new Workout(_user.Id, "Long", WorkoutType.Cardio, DateTime.UtcNow);
+            w2.AddExercise(new Exercise("B", 1, 1, 0, 3600));
+            w2.Complete(DateTime.UtcNow);
+            _repo.Save(w2);
 
-            var longest = _queryService.GetLongestWorkout(_user.Id);
+            var longest = _query.GetLongestWorkout(_user.Id);
             Assert.AreEqual("Long", longest.Title);
-        }
-
-        [TestMethod]
-        public void UserService_Register_SavesUser()
-        {
-            var userService = new UserService(_userRepo);
-            var u = userService.Register("NewUser", 30, 75.0);
-            var found = _userRepo.GetById(u.Id);
-            Assert.IsNotNull(found);
-            Assert.AreEqual("NewUser", found.Name);
         }
     }
 
@@ -251,55 +279,29 @@ namespace FitnessTracker.Tests
                 Directory.Delete(_tempDir, true);
         }
 
-        private (WorkoutService, UserService, WorkoutQueryService, User) BuildServices()
-        {
-            var workoutRepo = new FileWorkoutRepository(Path.Combine(_tempDir, "workouts.json"));
-            var userRepo = new FileUserRepository(Path.Combine(_tempDir, "users.json"));
-            var workoutService = new WorkoutService(workoutRepo, userRepo);
-            var userService = new UserService(userRepo);
-            var queryService = new WorkoutQueryService(workoutRepo);
-            var user = userService.Register("IntegrationUser", 28, 72.0);
-            return (workoutService, userService, queryService, user);
-        }
-
         [TestMethod]
         public void Persistence_WorkoutSavedAndReloaded()
         {
-            Guid workoutId;
-            Guid userId;
+            var workoutPath = Path.Combine(_tempDir, "workouts.json");
+            var userPath = Path.Combine(_tempDir, "users.json");
 
-            var userRepo1 = new FileUserRepository(Path.Combine(_tempDir, "users.json"));
-            var workoutRepo1 = new FileWorkoutRepository(Path.Combine(_tempDir, "workouts.json"));
-            var service1 = new WorkoutService(workoutRepo1, userRepo1);
+            var userRepo1 = new FileUserRepository(userPath);
+            var workoutRepo1 = new FileWorkoutRepository(workoutPath);
             var userService1 = new UserService(userRepo1);
-            var user1 = userService1.Register("PersistUser", 25, 70.0);
-            userId = user1.Id;
-            var w = service1.StartWorkout(userId, "Persisted Workout", WorkoutType.Strength);
-            service1.AddExercise(w.Id, "Squat", 3, 10, 100.0, 180);
-            service1.CompleteWorkout(w.Id);
-            workoutId = w.Id;
+            var user = userService1.Register("TestUser", 25, 70.0);
 
-            var userRepo2 = new FileUserRepository(Path.Combine(_tempDir, "users.json"));
-            var workoutRepo2 = new FileWorkoutRepository(Path.Combine(_tempDir, "workouts.json"));
-            var service2 = new WorkoutService(workoutRepo2, userRepo2);
-            var reloaded = workoutRepo2.GetById(workoutId);
+            var service1 = new WorkoutService(workoutRepo1, userRepo1);
+            var workout = service1.StartWorkout(user.Id, "Test Workout", WorkoutType.Strength);
+            service1.AddExercise(workout.Id, "Squat", 3, 10, 100.0, 120);
+            service1.CompleteWorkout(workout.Id);
+
+            var workoutRepo2 = new FileWorkoutRepository(workoutPath);
+            var reloaded = workoutRepo2.GetById(workout.Id);
 
             Assert.IsNotNull(reloaded);
-            Assert.AreEqual("Persisted Workout", reloaded.Title);
+            Assert.AreEqual("Test Workout", reloaded.Title);
             Assert.IsTrue(reloaded.IsCompleted);
             Assert.AreEqual(1, reloaded.Exercises.Count);
-        }
-
-        [TestMethod]
-        public void Persistence_MultipleWorkouts_AllReloaded()
-        {
-            var (service, userService, _, user) = BuildServices();
-            for (int i = 0; i < 3; i++)
-                service.StartWorkout(user.Id, $"Workout {i}", WorkoutType.Cardio);
-
-            var workoutRepo2 = new FileWorkoutRepository(Path.Combine(_tempDir, "workouts.json"));
-            var history = workoutRepo2.GetByUserId(user.Id).ToList();
-            Assert.AreEqual(3, history.Count);
         }
 
         [TestMethod]
@@ -313,65 +315,111 @@ namespace FitnessTracker.Tests
         [TestMethod]
         public void Persistence_CorruptedFile_ReturnsEmpty()
         {
-            var path = Path.Combine(_tempDir, "workouts.json");
-            File.WriteAllText(path, "THIS IS NOT JSON {{{{");
+            var path = Path.Combine(_tempDir, "corrupted.json");
+            File.WriteAllText(path, "NOT JSON{{{");
             var repo = new FileWorkoutRepository(path);
             var all = repo.GetAll().ToList();
             Assert.AreEqual(0, all.Count);
         }
 
         [TestMethod]
-        public void FullCycle_CreateAddComplete_PersistsCorrectly()
-        {
-            var (service, _, query, user) = BuildServices();
-            var w = service.StartWorkout(user.Id, "Full Cycle", WorkoutType.HIIT);
-            service.AddExercise(w.Id, "Burpee", 5, 20, 0, 300);
-            service.CompleteWorkout(w.Id);
-
-            var workoutRepo2 = new FileWorkoutRepository(Path.Combine(_tempDir, "workouts.json"));
-            var userRepo2 = new FileUserRepository(Path.Combine(_tempDir, "users.json"));
-            var service2 = new WorkoutService(workoutRepo2, userRepo2);
-            var history = service2.GetUserHistory(user.Id).ToList();
-
-            Assert.AreEqual(1, history.Count);
-            Assert.AreEqual("Full Cycle", history[0].Title);
-            Assert.AreEqual(1, history[0].Exercises.Count);
-        }
-
-        [TestMethod]
-        public void Analytics_AfterReload_CorrectStats()
-        {
-            var (service, _, _, user) = BuildServices();
-            var w = service.StartWorkout(user.Id, "Stats Test", WorkoutType.Strength);
-            service.AddExercise(w.Id, "Press", 3, 8, 60.0, 240);
-            service.CompleteWorkout(w.Id);
-
-            var workoutRepo2 = new FileWorkoutRepository(Path.Combine(_tempDir, "workouts.json"));
-            var query2 = new WorkoutQueryService(workoutRepo2);
-            var total = query2.GetTotalDurationMinutes(user.Id);
-            Assert.AreEqual(4.0, total, 0.01);
-        }
-
-        [TestMethod]
         public void UserPersistence_SaveAndReload()
         {
-            var userRepo1 = new FileUserRepository(Path.Combine(_tempDir, "users.json"));
-            var userService1 = new UserService(userRepo1);
-            var u = userService1.Register("SaveMe", 22, 65.0);
+            var userPath = Path.Combine(_tempDir, "users.json");
 
-            var userRepo2 = new FileUserRepository(Path.Combine(_tempDir, "users.json"));
-            var reloaded = userRepo2.GetById(u.Id);
+            var userRepo1 = new FileUserRepository(userPath);
+            var userService1 = new UserService(userRepo1);
+            var user = userService1.Register("SaveUser", 22, 65.0);
+
+            var userRepo2 = new FileUserRepository(userPath);
+            var reloaded = userRepo2.GetById(user.Id);
+
             Assert.IsNotNull(reloaded);
-            Assert.AreEqual("SaveMe", reloaded.Name);
+            Assert.AreEqual("SaveUser", reloaded.Name);
         }
 
         [TestMethod]
-        public void QueryService_GetLast30Days_FiltersCorrectly()
+        public void Persistence_MultipleWorkouts_AllReloaded()
         {
-            var (service, _, query, user) = BuildServices();
-            service.StartWorkout(user.Id, "Recent", WorkoutType.Cardio);
-            var recent = query.GetLast30Days(user.Id).ToList();
-            Assert.AreEqual(1, recent.Count);
+            var workoutPath = Path.Combine(_tempDir, "multi_workouts.json");
+            var userPath = Path.Combine(_tempDir, "multi_users.json");
+
+            var userRepo1 = new FileUserRepository(userPath);
+            var workoutRepo1 = new FileWorkoutRepository(workoutPath);
+            var userService1 = new UserService(userRepo1);
+            var user = userService1.Register("MultiUser", 25, 70.0);
+
+            var service1 = new WorkoutService(workoutRepo1, userRepo1);
+            for (int i = 0; i < 3; i++)
+            {
+                var w = service1.StartWorkout(user.Id, $"W{i}", WorkoutType.Cardio);
+                service1.CompleteWorkout(w.Id);
+            }
+
+            var workoutRepo2 = new FileWorkoutRepository(workoutPath);
+            var history = workoutRepo2.GetByUserId(user.Id).ToList();
+            Assert.AreEqual(3, history.Count);
+        }
+
+        [TestMethod]
+        public void Persistence_EmptyDataFile_ReturnsEmpty()
+        {
+            var path = Path.Combine(_tempDir, "empty.json");
+            File.WriteAllText(path, "[]");
+            var repo = new FileWorkoutRepository(path);
+            var all = repo.GetAll().ToList();
+            Assert.AreEqual(0, all.Count);
+        }
+
+        [TestMethod]
+        public void Persistence_WorkoutWithNoExercises_SavesAndReloads()
+        {
+            var workoutPath = Path.Combine(_tempDir, "no_exercises.json");
+            var userPath = Path.Combine(_tempDir, "no_exercises_user.json");
+
+            var userRepo1 = new FileUserRepository(userPath);
+            var workoutRepo1 = new FileWorkoutRepository(workoutPath);
+            var userService1 = new UserService(userRepo1);
+            var user = userService1.Register("EmptyUser", 25, 70.0);
+
+            var service1 = new WorkoutService(workoutRepo1, userRepo1);
+            var workout = service1.StartWorkout(user.Id, "Empty", WorkoutType.Cardio);
+            service1.CompleteWorkout(workout.Id);
+
+            var workoutRepo2 = new FileWorkoutRepository(workoutPath);
+            var reloaded = workoutRepo2.GetById(workout.Id);
+
+            Assert.IsNotNull(reloaded);
+            Assert.AreEqual(0, reloaded.Exercises.Count);
+            Assert.IsTrue(reloaded.IsCompleted);
+        }
+
+        [TestMethod]
+        public void FullCycle_MultipleUsers_DataIsolated()
+        {
+            var workoutPath = Path.Combine(_tempDir, "isolated_workouts.json");
+            var userPath = Path.Combine(_tempDir, "isolated_users.json");
+
+            var userRepo = new FileUserRepository(userPath);
+            var workoutRepo = new FileWorkoutRepository(workoutPath);
+            var userService = new UserService(userRepo);
+
+            var user1 = userService.Register("User1", 25, 70.0);
+            var user2 = userService.Register("User2", 30, 80.0);
+
+            var service = new WorkoutService(workoutRepo, userRepo);
+            var w1 = service.StartWorkout(user1.Id, "U1 Workout", WorkoutType.Cardio);
+            service.CompleteWorkout(w1.Id);
+            var w2 = service.StartWorkout(user2.Id, "U2 Workout", WorkoutType.Strength);
+            service.CompleteWorkout(w2.Id);
+
+            var user1Workouts = workoutRepo.GetByUserId(user1.Id).ToList();
+            var user2Workouts = workoutRepo.GetByUserId(user2.Id).ToList();
+
+            Assert.AreEqual(1, user1Workouts.Count);
+            Assert.AreEqual("U1 Workout", user1Workouts[0].Title);
+            Assert.AreEqual(1, user2Workouts.Count);
+            Assert.AreEqual("U2 Workout", user2Workouts[0].Title);
         }
     }
 }

@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
+using System.Threading;
 using FitnessTracker.Application;
 using FitnessTracker.Domain;
 
@@ -9,7 +11,8 @@ namespace FitnessTracker.Infrastructure
     public class FileWorkoutRepository : IWorkoutRepository
     {
         private readonly JsonDataStore<WorkoutDto> _store;
-        private readonly Dictionary<Guid, Workout> _cache = new Dictionary<Guid, Workout>();
+        private readonly SemaphoreSlim _semaphore = new SemaphoreSlim(1, 1);
+        private Dictionary<Guid, Workout> _cache = new Dictionary<Guid, Workout>();
         private bool _loaded = false;
 
         public FileWorkoutRepository(string filePath)
@@ -17,48 +20,70 @@ namespace FitnessTracker.Infrastructure
             _store = new JsonDataStore<WorkoutDto>(filePath);
         }
 
-        public void EnsureLoaded()
+        private async Task EnsureLoadedAsync()
         {
             if (_loaded) return;
-            var dtos = _store.LoadAsync().GetAwaiter().GetResult();
-            foreach (var dto in dtos)
+
+            await _semaphore.WaitAsync();
+            try
             {
-                var workout = MapFromDto(dto);
-                _cache[workout.Id] = workout;
+                if (_loaded) return;
+
+                var dtos = await _store.LoadAsync();
+                var newCache = new Dictionary<Guid, Workout>();
+                foreach (var dto in dtos)
+                {
+                    var workout = MapFromDto(dto);
+                    newCache[workout.Id] = workout;
+                }
+                _cache = newCache;
+                _loaded = true;
             }
-            _loaded = true;
+            finally
+            {
+                _semaphore.Release();
+            }
+        }
+
+        private async Task PersistAsync()
+        {
+            await _semaphore.WaitAsync();
+            try
+            {
+                var dtos = _cache.Values.Select(MapToDto).ToList();
+                await _store.SaveAsync(dtos);
+            }
+            finally
+            {
+                _semaphore.Release();
+            }
         }
 
         public void Save(Workout workout)
         {
-            EnsureLoaded();
+            if (workout == null) throw new ArgumentNullException(nameof(workout));
+            EnsureLoadedAsync().GetAwaiter().GetResult();
             _cache[workout.Id] = workout;
-            Persist();
+            PersistAsync().GetAwaiter().GetResult();
         }
 
         public Workout GetById(Guid id)
         {
-            EnsureLoaded();
-            _cache.TryGetValue(id, out var w);
-            return w;
+            EnsureLoadedAsync().GetAwaiter().GetResult();
+            _cache.TryGetValue(id, out var workout);
+            return workout;
         }
 
         public IEnumerable<Workout> GetByUserId(Guid userId)
         {
-            EnsureLoaded();
+            EnsureLoadedAsync().GetAwaiter().GetResult();
             return _cache.Values.Where(w => w.UserId == userId);
         }
 
         public IEnumerable<Workout> GetAll()
         {
-            EnsureLoaded();
+            EnsureLoadedAsync().GetAwaiter().GetResult();
             return _cache.Values;
-        }
-
-        private void Persist()
-        {
-            var dtos = _cache.Values.Select(MapToDto).ToList();
-            _store.SaveAsync(dtos).GetAwaiter().GetResult();
         }
 
         private WorkoutDto MapToDto(Workout w)
@@ -90,10 +115,12 @@ namespace FitnessTracker.Infrastructure
             var workout = WorkoutRehydrator.Rehydrate(
                 dto.Id, dto.UserId, dto.Title,
                 (WorkoutType)dto.Type, dto.StartedAt, dto.CompletedAt);
+
             foreach (var e in dto.Exercises)
-                workout.AddExercise(ExerciseRehydrator.Rehydrate(
-                    e.Id, e.Name, e.Sets, e.Reps, e.WeightKg, e.DurationSeconds));
+            {
+                var exercise = ExerciseRehydrator.Rehydrate(
+                    e.Id, e.Name, e.Sets, e.Reps, e.WeightKg, e.DurationSeconds);
+                workout.AddExerciseForRehydration(exercise);
+            }
             return workout;
         }
-    }
-}
